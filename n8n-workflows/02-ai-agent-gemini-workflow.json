@@ -1,0 +1,246 @@
+{
+  "name": "Earnings Tracker - AI Agent with Gemini",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "earnings-ai-agent",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "ai-webhook-trigger",
+      "name": "AI Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300],
+      "webhookId": "REPLACE_WITH_YOUR_AI_WEBHOOK_ID"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.APP_URL }}/api/webhooks/n8n",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "action",
+              "value": "get_records"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fetch-records",
+      "name": "Fetch Earnings Records",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "model": "gemini-1.5-flash",
+        "prompt": "={{ $json.prompt || $json.query }}",
+        "options": {
+          "temperature": 0.7,
+          "maxTokens": 1000
+        }
+      },
+      "id": "gemini-ai",
+      "name": "Gemini AI",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 1,
+      "position": [690, 300],
+      "credentials": {
+        "openAiApi": {
+          "id": "REPLACE_WITH_YOUR_GEMINI_CREDENTIAL_ID",
+          "name": "Gemini API"
+        }
+      },
+      "notes": "Configure this to use Google Gemini API endpoint"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Process Gemini response and extract actions\nconst response = $input.first().json.choices[0].message.content;\n\n// Check for action patterns\nconst actionMatch = response.match(/###ACTION_START###([\\s\\S]*?)###ACTION_END###/);\n\nif (actionMatch) {\n  const actionData = JSON.parse(actionMatch[1]);\n  return {\n    hasAction: true,\n    action: actionData,\n    response: response.replace(/###ACTION_START###[\\s\\S]*?###ACTION_END###/, '').trim()\n  };\n}\n\nreturn {\n  hasAction: false,\n  action: null,\n  response: response\n};"
+      },
+      "id": "parse-ai-response",
+      "name": "Parse AI Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [910, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.hasAction }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "check-for-action",
+      "name": "Has Action?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1130, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.APP_URL }}/api/webhooks/n8n",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "action",
+              "value": "={{ $json.action.type }}"
+            },
+            {
+              "name": "data",
+              "value": "={{ $json.action.data }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "execute-action",
+      "name": "Execute Action",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1350, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.GOOGLE_SHEETS_WEBHOOK_URL }}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "eventType",
+              "value": "ai_action_executed"
+            },
+            {
+              "name": "action",
+              "value": "={{ $json.action }}"
+            },
+            {
+              "name": "timestamp",
+              "value": "={{ $now.toISO() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "update-sheets",
+      "name": "Update Google Sheets",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [1570, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"response\": $json.response, \"actionExecuted\": $json.hasAction } }}"
+      },
+      "id": "respond-with-ai-response",
+      "name": "Respond with AI Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1790, 300]
+    }
+  ],
+  "connections": {
+    "AI Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Fetch Earnings Records",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Earnings Records": {
+      "main": [
+        [
+          {
+            "node": "Gemini AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini AI": {
+      "main": [
+        [
+          {
+            "node": "Parse AI Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse AI Response": {
+      "main": [
+        [
+          {
+            "node": "Has Action?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Action?": {
+      "main": [
+        [
+          {
+            "node": "Execute Action",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond with AI Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Action": {
+      "main": [
+        [
+          {
+            "node": "Update Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Respond with AI Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null,
+  "tags": ["earnings-tracker", "ai-agent", "gemini"],
+  "triggerCount": 0,
+  "updatedAt": "2025-01-16T00:00:00.000Z",
+  "versionId": "1"
+}

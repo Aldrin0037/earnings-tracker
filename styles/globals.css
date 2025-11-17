@@ -1,0 +1,135 @@
+@import "tailwindcss";
+
+@theme {
+  /* Fonts */
+  --font-sans: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
+  
+  /* Colors - Converted from HSL to RGB to prevent oklab() parsing errors */
+  --color-background: rgb(255, 255, 255);
+  --color-foreground: rgb(12, 12, 18);
+  --color-card: rgb(255, 255, 255);
+  --color-card-foreground: rgb(12, 12, 18);
+  --color-popover: rgb(255, 255, 255);
+  --color-popover-foreground: rgb(12, 12, 18);
+  --color-primary: rgb(15, 20, 30);
+  --color-primary-foreground: rgb(250, 252, 255);
+  --color-secondary: rgb(240, 245, 250);
+  --color-secondary-foreground: rgb(15, 20, 30);
+  --color-muted: rgb(240, 245, 250);
+  --color-muted-foreground: rgb(100, 110, 120);
+  --color-accent: rgb(240, 245, 250);
+  --color-accent-foreground: rgb(15, 20, 30);
+  --color-destructive: rgb(245, 60, 60);
+  --color-destructive-foreground: rgb(250, 252, 255);
+  --color-border: rgb(230, 235, 240);
+  --color-input: rgb(230, 235, 240);
+  --color-ring: rgb(12, 12, 18);
+}
+
+:root {
+  --background: theme(colors.background);
+  --foreground: theme(colors.foreground);
+  --card: theme(colors.card);
+  --card-foreground: theme(colors.card-foreground);
+  --popover: theme(colors.popover);
+  --popover-foreground: theme(colors.popover-foreground);
+  --primary: theme(colors.primary);
+  --primary-foreground: theme(colors.primary-foreground);
+  --secondary: theme(colors.secondary);
+  --secondary-foreground: theme(colors.secondary-foreground);
+  --muted: theme(colors.muted);
+  --muted-foreground: theme(colors.muted-foreground);
+  --accent: theme(colors.accent);
+  --accent-foreground: theme(colors.accent-foreground);
+  --destructive: theme(colors.destructive);
+  --destructive-foreground: theme(colors.destructive-foreground);
+  --border: theme(colors.border);
+  --input: theme(colors.input);
+  --ring: theme(colors.ring);
+  --radius: 0.5rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: rgb(12, 12, 18);
+    --foreground: rgb(250, 252, 255);
+    --card: rgb(12, 12, 18);
+    --card-foreground: rgb(250, 252, 255);
+    --popover: rgb(12, 12, 18);
+    --popover-foreground: rgb(250, 252, 255);
+    --primary: rgb(250, 252, 255);
+    --primary-foreground: rgb(15, 20, 30);
+    --secondary: rgb(30, 40, 50);
+    --secondary-foreground: rgb(250, 252, 255);
+    --muted: rgb(30, 40, 50);
+    --muted-foreground: rgb(160, 170, 180);
+    --accent: rgb(30, 40, 50);
+    --accent-foreground: rgb(250, 252, 255);
+    --destructive: rgb(120, 30, 30);
+    --destructive-foreground: rgb(250, 252, 255);
+    --border: rgb(30, 40, 50);
+    --input: rgb(30, 40, 50);
+    --ring: rgb(210, 220, 230);
+  }
+  
+  @theme {
+    --color-background: rgb(12, 12, 18);
+    --color-foreground: rgb(250, 252, 255);
+    --color-card: rgb(12, 12, 18);
+    --color-card-foreground: rgb(250, 252, 255);
+    --color-popover: rgb(12, 12, 18);
+    --color-popover-foreground: rgb(250, 252, 255);
+    --color-primary: rgb(250, 252, 255);
+    --color-primary-foreground: rgb(15, 20, 30);
+    --color-secondary: rgb(30, 40, 50);
+    --color-secondary-foreground: rgb(250, 252, 255);
+    --color-muted: rgb(30, 40, 50);
+    --color-muted-foreground: rgb(160, 170, 180);
+    --color-accent: rgb(30, 40, 50);
+    --color-accent-foreground: rgb(250, 252, 255);
+    --color-destructive: rgb(120, 30, 30);
+    --color-destructive-foreground: rgb(250, 252, 255);
+    --color-border: rgb(30, 40, 50);
+    --color-input: rgb(30, 40, 50);
+    --color-ring: rgb(210, 220, 230);
+  }
+}
+
+* {
+  border-color: theme(colors.border);
+}
+
+body {
+  background: theme(colors.background);
+  color: theme(colors.foreground);
+  font-family: theme(fontFamily.sans);
+}
+
+/* Scrollbar styles */
+@supports (scrollbar-width: thin) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: theme(colors.border) transparent;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: theme(colors.border);
+  border-radius: 0.375rem;
+  border: 0.25rem solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: theme(colors.muted-foreground);
+}

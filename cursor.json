@@ -1,0 +1,13 @@
+{
+  "rules": [
+    "Use TypeScript and Next.js App Router",
+    "Follow the folder structure exactly. Do not create extra top-level folders",
+    "Centralize all business calculations in /lib/calculations.ts",
+    "Centralize all data access in /lib/storage.ts (abstract localStorage or Supabase)",
+    "UI components must be presentational. Pages wire the components with data",
+    "Use Tailwind CSS + shadcn/ui for styling",
+    "Use react-hook-form + zod for form validation",
+    "Do not hardcode secrets; use environment variables only",
+    "Functions must be small, reusable, and documented"
+  ]
+}
